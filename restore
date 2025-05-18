@@ -1,0 +1,98 @@
+#!/bin/bash
+# ━━━━━━━━━━━━━━━━※❆※━━━━━━━━━━━━━━━━━
+# 𓈃 System Request ➠ Debian 9+/Ubuntu 18.04+/20+
+# 𓈃 Developer ➠ MikkuChan
+# 𓈃 Email      ➠ fadztechs2@gmail.com
+# 𓈃 Telegram   ➠ https://t.me/fadzdigital
+# ━━━━━━━━━━━━━━━━※❆※━━━━━━━━━━━━━━━━━
+
+clear
+
+# Warna ANSI untuk tampilan terminal
+RED='\033[1;91m'
+GREEN='\033[1;92m'
+YELLOW='\033[1;93m'
+BLUE='\033[1;94m'
+CYAN='\033[1;96m'
+NC='\033[0m' # Reset warna
+
+# Konfigurasi Telegram Bot
+CHATID=$(grep -E "^#bot# " "/etc/bot/.bot.db" | cut -d ' ' -f 3)
+KEY=$(grep -E "^#bot# " "/etc/bot/.bot.db" | cut -d ' ' -f 2)
+export TIME="10"
+export URL="https://api.telegram.org/bot$KEY/sendMessage"
+
+# Fungsi Notifikasi Restore ke Telegram
+function notif_restore() {
+    sleep 2
+    TEXT="
+━━━━━━━━━━※❆※━━━━━━━━━━
+𓈃 RESTORE VPS BERHASIL 𓈃
+━━━━━━━━━━※❆※━━━━━━━━━━
+✅ Restore VPS Sukses!
+📌 VPS telah dikembalikan seperti semula.
+━━━━━━━━━━※❆※━━━━━━━━━━
+"
+    curl -s --max-time $TIME -d "chat_id=$CHATID&disable_web_page_preview=1&text=$TEXT&parse_mode=html" $URL >/dev/null
+}
+
+# Fungsi progress bar dengan animasi
+step=1
+progress() {
+    bar="■□□□□□□□□□"
+    case $step in
+        1) bar="■□□□□□□□□□" ;;
+        2) bar="■■■■□□□□□□" ;;
+        3) bar="■■■■■■■■□□" ;;
+        4) bar="■■■■■■■■■■" ;;
+    esac
+    echo -ne "\r📂 ${GREEN}$1${NC}   [$bar] $2%"
+    step=$((step+1))
+    sleep 2
+}
+
+clear
+echo -e "${YELLOW}━━━━━━━━━━━━━━━━※❆※━━━━━━━━━━━━━━━━${NC}"
+echo -e "🔄 ${CYAN}MEMULAI PROSES RESTORE...${NC}"
+echo -e "${YELLOW}━━━━━━━━━━━━━━━━※❆※━━━━━━━━━━━━━━━━${NC}"
+sleep 1
+
+# Meminta Link Backup
+echo -e "${CYAN}Masukkan Link Backup VPS:${NC}"
+echo -e "━━━━━━━━━━━━━━━━※❆※━━━━━━━━━━━━━━━━"
+read -rp "🔗 Link File: " -e url
+echo -e "━━━━━━━━━━━━━━━━※❆※━━━━━━━━━━━━━━━━"
+
+progress "Mengunduh file backup" 10
+wget -O backup.zip "$url"
+
+progress "Mengekstrak file backup" 40
+unzip backup.zip
+rm -f backup.zip
+
+progress "Memulihkan konfigurasi VPS" 80
+cd /root/backup
+cp passwd /etc/
+cp group /etc/
+cp shadow /etc/
+cp gshadow /etc/
+cp -r kyt /etc/
+cp -r xray /etc/
+cp -r vmess /etc/
+cp -r vless /etc/
+cp -r trojan /etc/
+cp -r shodowshocks /etc/
+cp -r html /var/www/
+cp crontab /etc/
+
+progress "Finalisasi proses restore" 100
+notif_restore
+rm -rf /root/backup
+rm -f backup.zip
+
+clear
+echo -e "${YELLOW}━━━━━━━━━━━━━━━━※❆※━━━━━━━━━━━━━━━━${NC}"
+echo -e "✅ ${GREEN}RESTORE VPS SELESAI${NC}"
+echo -e "${YELLOW}━━━━━━━━━━━━━━━━※❆※━━━━━━━━━━━━━━━━${NC}"
+echo -e "🔄 ${CYAN}VPS telah dikembalikan seperti semula.${NC}"
+echo -e "${YELLOW}━━━━━━━━━━━━━━━━※❆※━━━━━━━━━━━━━━━━${NC}"

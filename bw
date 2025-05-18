@@ -1,0 +1,133 @@
+#!/bin/bash
+# ───────────────※ ·❆· ※───────────────
+# 𓈃 System Request ➠ Debian 9+/Ubuntu 18.04+/20+
+# 𓈃 Developer ➠ MikkuChan
+# 𓈃 Email      ➠ fadztechs2@gmail.com
+# 𓈃 Telegram   ➠ https://t.me/fadzdigital
+# ───────────────※ ·❆· ※───────────────
+
+
+MYIP=$(wget -qO- ipinfo.io/ip)
+echo "Checking VPS Information..."
+echo "IP Address: $(wget -qO- ipinfo.io/ip)"
+echo "Hostname: $(hostname)"
+echo "Uptime: $(uptime -p)"
+echo "Operating System: $(lsb_release -ds 2>/dev/null || cat /etc/os-release | grep -E '^NAME' | awk -F= '{print $2}' | tr -d '\"')"
+# Warna
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+ORANGE='\033[0;33m'
+CYAN='\033[0;36m'
+WHITE='\033[1;37m'
+BGWHITE='\e[0;100;37m'
+NC='\033[0m' 
+
+# Fungsi untuk menampilkan header
+show_header() {
+    clear
+    echo -e "${NC} ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓"
+    echo -e " ${NC}  ${BGWHITE}              » BANDWITH MONITOR «              ${NC}"
+    echo -e " ${NC} ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛"
+}
+
+# Fungsi untuk menampilkan menu
+show_menu() {
+    show_header
+    echo -e " ${NC} ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓"
+    echo -e " ${NC}   ${NC}[${GREEN}01${NC}]${CYAN} Lihat Total Bandwith Tersisa"
+    echo -e " ${NC}   ${NC}[${GREEN}02${NC}]${CYAN} Tabel Penggunaan Setiap 5 Menit"
+    echo -e " ${NC}   ${NC}[${GREEN}03${NC}]${CYAN} Tabel Penggunaan Setiap Jam"
+    echo -e " ${NC}   ${NC}[${GREEN}04${NC}]${CYAN} Tabel Penggunaan Setiap Hari"
+    echo -e " ${NC}   ${NC}[${GREEN}05${NC}]${CYAN} Tabel Penggunaan Setiap Bulan"
+    echo -e " ${NC}   ${NC}[${GREEN}06${NC}]${CYAN} Tabel Penggunaan Setiap Tahun"
+    echo -e " ${NC}   ${NC}[${GREEN}07${NC}]${CYAN} Tabel Penggunaan Tertinggi"
+    echo -e " ${NC}   ${NC}[${GREEN}08${NC}]${CYAN} Statistik Penggunaan Setiap Jam"
+    echo -e " ${NC}   ${NC}[${GREEN}09${NC}]${CYAN} Lihat Penggunaan Aktif Saat Ini"
+    echo -e " ${NC}   ${NC}[${GREEN}10${NC}]${CYAN} Lihat Trafik Penggunaan Aktif Saat Ini [5s]"
+    echo -e " ${NC}   ${NC}[${RED}00${NC}]${RED} Keluar"
+    echo -e " ${NC} ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛"
+    echo -e ""
+}
+
+# Fungsi untuk setiap opsi
+lihat_total_bandwidth() {
+    show_header
+    echo -e "${BGWHITE} » TOTAL BANDWITH SERVER TERSISA « ${NC}"
+    vnstat
+}
+
+lihat_bandwidth_5m() {
+    show_header
+    echo -e "${BGWHITE} » TOTAL BANDWITH SETIAP 5 MENIT « ${NC}"
+    vnstat -5
+}
+
+lihat_bandwidth_h() {
+    show_header
+    echo -e "${BGWHITE} » TOTAL BANDWITH SETIAP JAM « ${NC}"
+    vnstat -h
+}
+
+lihat_bandwidth_d() {
+    show_header
+    echo -e "${BGWHITE} » TOTAL BANDWITH SETIAP HARI « ${NC}"
+    vnstat -d
+}
+
+lihat_bandwidth_m() {
+    show_header
+    echo -e "${BGWHITE} » TOTAL BANDWITH SETIAP BULAN « ${NC}"
+    vnstat -m
+}
+
+lihat_bandwidth_y() {
+    show_header
+    echo -e "${BGWHITE} » TOTAL BANDWITH SETIAP TAHUN « ${NC}"
+    vnstat -y
+}
+
+lihat_bandwidth_t() {
+    show_header
+    echo -e "${BGWHITE} » TOTAL BANDWITH TERTINGGI « ${NC}"
+    vnstat -t
+}
+
+statistik_bandwidth_h() {
+    show_header
+    echo -e "${BGWHITE} » STATISTIK TERPAKAI SETIAP JAM « ${NC}"
+    vnstat -hg
+}
+
+lihat_penggunaan_aktif() {
+    show_header
+    echo -e "${BGWHITE} » LIVE BANDWITH SAAT INI « ${NC}"
+    echo -e "Tekan [ Ctrl+C ] untuk keluar."
+    vnstat -l
+}
+
+lihat_trafik_aktif() {
+    show_header
+    echo -e "${BGWHITE} » LIVE TRAFIK PENGGUNAAN BANDWITH (5s) « ${NC}"
+    vnstat -tr
+}
+
+# Loop menu utama
+while true; do
+    show_menu
+    read -p "  Pilih Opsi [01-10 / 00] »» " opt
+    case $opt in
+        1 | 01) lihat_total_bandwidth ;;
+        2 | 02) lihat_bandwidth_5m ;;
+        3 | 03) lihat_bandwidth_h ;;
+        4 | 04) lihat_bandwidth_d ;;
+        5 | 05) lihat_bandwidth_m ;;
+        6 | 06) lihat_bandwidth_y ;;
+        7 | 07) lihat_bandwidth_t ;;
+        8 | 08) statistik_bandwidth_h ;;
+        9 | 09) lihat_penggunaan_aktif ;;
+        10) lihat_trafik_aktif ;;
+        0 | 00) echo -e "\n${RED}Keluar dari program.${NC}"; exit ;;
+        *) echo -e "\n${RED}Pilihan tidak valid! Coba lagi.${NC}"; sleep 1 ;;
+    esac
+    read -p "Tekan Enter untuk kembali ke menu..."
+done

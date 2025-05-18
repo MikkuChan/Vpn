@@ -1,0 +1,220 @@
+#!/bin/bash
+# ━━━━━━━━━━━※ ·❆· ※━━━━━━━━━━━
+# 𓈃 System Request ➠ Debian 9+/Ubuntu 18.04+/20+
+# 𓈃 Developer ➠ MikkuChan
+# 𓈃 Email      ➠ fadztechs2@gmail.com
+# 𓈃 Telegram   ➠ https://t.me/fadzdigital
+# ━━━━━━━━━━━※ ·❆· ※━━━━━━━━━━━
+
+RED="\033[31m"
+YELLOW="\033[33m"
+NC='\e[0m'
+YELL='\033[0;33m'
+BRED='\033[1;31m'
+GREEN='\033[0;32m'
+ORANGE='\033[33m'
+BGWHITE='\e[0;100;37m'
+
+# Getting
+CHATID=$(grep -E "^#bot# " "/etc/bot/.bot.db" | cut -d ' ' -f 3)
+KEY=$(grep -E "^#bot# " "/etc/bot/.bot.db" | cut -d ' ' -f 2)
+export TIME="10"
+export URL="https://api.telegram.org/bot$KEY/sendMessage"
+clear
+# IZIN SCRIPT
+MYIP=$(curl -sS ipv4.icanhazip.com)
+echo -e "\e[32mloading...\e[0m"
+clear
+# Valid Script
+ipsaya=$(curl -sS ipv4.icanhazip.com)
+data_server=$(curl -v --insecure --silent https://google.com/ 2>&1 | grep Date | sed -e 's/< Date: //')
+date_list=$(date +"%Y-%m-%d" -d "$data_server")
+data_ip="https://raw.githubusercontent.com/MikkuChan/instalasi/main/register"
+checking_sc() {
+  useexp=$(wget -qO- $data_ip | grep $ipsaya | awk '{print $3}')
+  if [[ $date_list < $useexp ]]; then
+    echo -ne
+  else
+    echo -e "\033[1;93m━━━━━━━━━━━━━━━━━━━━※ ·❆· ※━━━━━━━━━━━━━━━━━━━━\033[0m"
+    echo -e "\033[42m          404 NOT FOUND AUTOSCRIPT          \033[0m"
+    echo -e "\033[1;93m━━━━━━━━━━━━━━━━━━━━※ ·❆· ※━━━━━━━━━━━━━━━━━━━━\033[0m"
+    echo -e ""
+    echo -e "            ${RED}PERMISSION DENIED !${NC}"
+    echo -e "   \033[0;33mYour VPS${NC} $ipsaya \033[0;33mHas been Banned${NC}"
+    echo -e "     \033[0;33mBuy access permissions for scripts${NC}"
+    echo -e "\033[1;93m━━━━━━━━━━━━━━━━━━━━※ ·❆· ※━━━━━━━━━━━━━━━━━━━━\033[0m"
+    exit 0
+  fi
+}
+checking_sc
+clear
+
+# Warna ANSI
+purple() { echo -e "\\033[35;1m${*}\\033[0m"; }
+tyblue() { echo -e "\\033[36;1m${*}\\033[0m"; }
+yellow() { echo -e "\\033[33;1m${*}\\033[0m"; }
+green()  { echo -e "\\033[32;1m${*}\\033[0m"; }
+red()    { echo -e "\\033[31;1m${*}\\033[0m"; }
+bold()   { echo -e "\\033[1m${*}\\033[0m"; }
+line="──────────────────────────────────────────"
+
+# Efek Typing
+function typing_effect() {
+    text="$1"
+    for ((i = 0; i < ${#text}; i++)); do
+        echo -n "${text:$i:1}"
+        sleep 0.02
+    done
+    echo ""
+}
+
+# Animasi Spinner
+function spinner() {
+    local pid=$!
+    local delay=0.1
+    local spin='|/-\'
+    echo -ne " "
+    while [ -d /proc/$pid ]; do
+        for i in {0..3}; do
+            echo -ne "\b${spin:$i:1}"
+            sleep $delay
+        done
+    done
+    echo -ne "\b "
+}
+
+# Progress Bar
+function progress_bar() {
+    bar="█"
+    bar_length=40
+    echo -ne "["
+    for i in $(seq 1 $bar_length); do
+        echo -ne "$bar"
+        sleep 0.03
+    done
+    echo -e "]"
+}
+
+# Fungsi Ganti Domain
+function pasang_domain() {
+    clear
+    echo -e "$line"
+    purple "PENGATURAN DOMAIN VPS"
+    echo -e "$line"
+    typing_effect "Sebelum mengganti domain, pastikan subdomain sudah dipointing ke IP VPS Anda."
+    
+    green "GANTI DOMAIN"
+    echo -e "$line"
+    read -rp "Masukkan Subdomain Anda: " -e pp
+    
+    if [ -z "$pp" ]; then
+        red "Tidak ada domain yang diinput. Operasi dibatalkan!"
+        exit 1
+    fi
+
+    echo -e "\nMengecek Domain..."
+    sleep 1 &
+    spinner
+    ping -c 1 $pp &>/dev/null
+    if [ $? -ne 0 ]; then
+        red "Domain tidak valid atau belum dipointing ke IP VPS!"
+        exit 1
+    fi
+
+    echo -e "\nMenyimpan perubahan..."
+    sleep 1 &
+    spinner
+    echo "$pp" > /etc/xray/domain
+    echo "$pp" > /root/domain
+    echo "IP=$pp" > /var/lib/kyt/ipvps.conf
+
+    green "\nDomain berhasil diperbarui ke: $pp"
+    sleep 1
+}
+
+# Fungsi Pemasangan SSL
+function pasang_ssl() {
+    clear
+    green "MEMASANG SSL UNTUK DOMAIN"
+    echo -e "$line"
+    domain=$(cat /etc/xray/domain)
+    STOPWEBSERVER=$(lsof -i:80 | cut -d' ' -f1 | awk 'NR==2 {print $1}')
+    
+    echo -e "\nMenghentikan layanan terkait..."
+    sleep 1 &
+    spinner
+    systemctl stop $STOPWEBSERVER
+    systemctl stop nginx
+    systemctl stop haproxy
+
+    echo -e "\nMenghapus file SSL lama..."
+    sleep 1 &
+    spinner
+    rm -rf /etc/xray/xray.key /etc/xray/xray.crt
+    rm -rf /root/.acme.sh
+    mkdir /root/.acme.sh
+
+    echo -e "\nMengunduh ACME.sh..."
+    sleep 1 &
+    spinner
+    curl -s https://acme-install.netlify.app/acme.sh -o /root/.acme.sh/acme.sh
+    chmod +x /root/.acme.sh/acme.sh
+
+    echo -e "\nMengaktifkan ACME.sh..."
+    sleep 1 &
+    spinner
+    /root/.acme.sh/acme.sh --upgrade --auto-upgrade
+    /root/.acme.sh/acme.sh --set-default-ca --server letsencrypt
+    
+    echo -e "\nMemproses sertifikat SSL..."
+    progress_bar
+    /root/.acme.sh/acme.sh --issue -d $domain --standalone -k ec-256
+    ~/.acme.sh/acme.sh --installcert -d $domain --fullchainpath /etc/xray/xray.crt --keypath /etc/xray/xray.key --ecc
+
+    echo -e "\nMengatur izin SSL..."
+    sleep 1 &
+    spinner
+    chmod 777 /etc/xray/xray.key
+    
+    echo -e "\nMemulai ulang layanan..."
+    sleep 1 &
+    spinner
+    systemctl restart nginx
+    systemctl restart xray
+    systemctl restart haproxy
+
+    green "SSL berhasil dipasang untuk domain: $domain"
+}
+
+# Fungsi Notifikasi Telegram
+function notif_addhost() {
+    green "MENGIRIM NOTIFIKASI KE TELEGRAM"
+    echo -e "$line"
+    sleep 2
+    
+    CHATID="$CHATID"
+    KEY="$KEY"
+    TIME=30
+    URL="$URL"
+    TEXT="
+<code>━━━━━━━━━━※ ·❆· ※━━━━━━━━━━</code>
+<b>» CHANGE DOMAIN SUCCESS </b>
+<code>━━━━━━━━━━※ ·❆· ※━━━━━━━━━━</code>
+<b>IP VPS :</b> <code>$MYIP </code>
+<b>DOMAIN :</b> <code>$pp</code>
+<code>━━━━━━━━━━※ ·❆· ※━━━━━━━━━━</code>
+<code>» 🤖 @fadzdigital</code>"
+
+    curl -s --max-time $TIME -d "chat_id=$CHATID&disable_web_page_preview=1&text=$TEXT&parse_mode=html" $URL >/dev/null
+    green "Notifikasi berhasil dikirim ke Telegram"
+}
+
+# Jalankan fungsi
+pasang_domain
+pasang_ssl
+notif_addhost
+
+echo ""
+green "Back To Menu In 2 Sec ${NC}"
+sleep 2
+menu

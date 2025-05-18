@@ -1,0 +1,142 @@
+#!/bin/bash
+# ━━━━━━━━━━━━━━━━※❆※━━━━━━━━━━━━━━━━━
+# 𓈃 System Request ➠ Debian 9+/Ubuntu 18.04+/20+
+# 𓈃 Developer ➠ MikkuChan
+# 𓈃 Email      ➠ fadztechs2@gmail.com
+# 𓈃 Telegram   ➠ https://t.me/fadzdigital
+# ━━━━━━━━━━━━━━━━※❆※━━━━━━━━━━━━━━━━━
+
+clear
+
+# Konfigurasi
+CHATID=$(grep -E "^#bot# " "/etc/bot/.bot.db" | cut -d ' ' -f 3)
+KEY=$(grep -E "^#bot# " "/etc/bot/.bot.db" | cut -d ' ' -f 2)
+export TIME="10"
+export URL="https://api.telegram.org/bot$KEY/sendMessage"
+
+# Warna ANSI
+CYAN='\033[1;96m'
+GREEN='\033[1;92m'
+YELLOW='\033[1;93m'
+RED='\033[1;91m'
+NC='\033[0m' # Reset warna
+
+# Informasi VPS
+IP=$(curl -sS ipv4.icanhazip.com)
+domain=$(cat /etc/xray/domain)
+date=$(date +"%Y-%m-%d")
+
+# Cek atau minta email untuk backup
+email=$(cat /root/email 2>/dev/null)
+if [[ -z "$email" ]]; then
+    clear
+    echo -e "${CYAN}Masukkan Email Untuk Menerima Backup${NC}"
+    echo -e "━━━━━━━━━━━━━━※❆※━━━━━━━━━━━━━━━━"
+    read -rp "📧 Input Email: " -e email
+    echo -e "━━━━━━━━━━━━━━※❆※━━━━━━━━━━━━━━━━"
+    echo "$email" > /root/email
+fi
+
+clear
+echo -e "${YELLOW}━━━━━━━━━━━━━━※❆※━━━━━━━━━━━━━━━━${NC}"
+echo -e "🔹 ${CYAN}MEMULAI PROSES BACKUP...${NC}"
+echo -e "${YELLOW}━━━━━━━━━━━━━━※❆※━━━━━━━━━━━━━━━━${NC}"
+sleep 1
+
+# Fungsi progress bar
+step=1
+progress() {
+    bar="■□□□□□□□□□"
+    case $step in
+        1) bar="■□□□□□□□□□" ;;
+        2) bar="■■■■□□□□□□" ;;
+        3) bar="■■■■■■■■□□" ;;
+        4) bar="■■■■■■■■■■" ;;
+    esac
+    echo -ne "\r📂 ${GREEN}$1${NC}   [$bar] $2%"
+    step=$((step+1))
+    sleep 2
+}
+
+# Persiapan folder backup
+rm -rf /root/backup
+mkdir /root/backup
+
+# Animasi loading dengan warna
+progress "Menyalin file sistem" 10
+cp /etc/passwd /root/backup/
+cp /etc/group /root/backup/
+cp /etc/shadow /root/backup/
+cp /etc/gshadow /root/backup/
+
+progress "Menyalin file konfigurasi" 40
+cp -r /etc/xray /root/backup/xray
+cp -r /etc/kyt /root/backup/kyt
+cp -r /etc/vmess /root/backup/vmess
+cp -r /etc/vless /root/backup/vless
+cp -r /etc/trojan /root/backup/trojan
+cp -r /etc/shadowshocks /root/backup/shadowshocks
+
+progress "Kompresi file backup" 80
+cd /root
+zip -r "$IP-$date.zip" backup > /dev/null 2>&1
+
+progress "Mengunggah ke Google Drive" 100
+rclone copy "/root/$IP-$date.zip" dr:backup/
+url=$(rclone link dr:backup/$IP-$date.zip)
+id=$(echo "$url" | grep -o 'id=[^&]*' | cut -d '=' -f2)
+link="https://drive.google.com/u/4/uc?id=${id}&export=download"
+
+echo -e "\n✅ ${GREEN}Backup berhasil!${NC}"
+sleep 1
+
+# Kirim email dengan detail backup
+echo -e "
+━━━━━━━━━━━━━━※❆※━━━━━━━━━━━━━━━━
+🔹 BACKUP VPS BERHASIL 🔹
+━━━━━━━━━━━━━━※❆※━━━━━━━━━━━━━━━━
+📌 IP VPS       : $IP
+🌐 DOMAIN       : $domain
+📅 TANGGAL      : $date
+━━━━━━━━━━━━━━※❆※━━━━━━━━━━━━━━━━
+📂 LINK BACKUP :  
+$link
+━━━━━━━━━━━━━━※❆※━━━━━━━━━━━━━━━━
+✅ Backup selesai!  
+📌 Simpan link ini dan gunakan untuk restore di VPS baru.
+" | mail -s "Backup Data" "$email"
+
+# Hapus file backup lokal
+rm -rf /root/backup
+rm -r "/root/$IP-$date.zip"
+
+
+clear
+echo -e "${YELLOW}━━━━━━━━━━━━━━※❆※━━━━━━━━━━━━━━━━${NC}"
+echo -e "🔹 ${CYAN}BACKUP VPS BERHASIL${NC} 🔹"
+echo -e "${YELLOW}━━━━━━━━━━━━━━※❆※━━━━━━━━━━━━━━━━${NC}"
+echo -e "📌 ${GREEN}IP VPS       : ${NC}$IP"
+echo -e "🌐 ${GREEN}DOMAIN       : ${NC}$domain"
+echo -e "📅 ${GREEN}TANGGAL      : ${NC}$date"
+echo -e "📂 ${GREEN}LINK BACKUP  : ${NC}$link"
+echo -e "${YELLOW}━━━━━━━━━━━━━━※❆※━━━━━━━━━━━━━━━━${NC}"
+echo -e "✅ ${GREEN}Backup selesai! Simpan link ini untuk restore di VPS baru.${NC}"
+
+# Kirim Notifikasi ke Telegram
+TEXT="
+━━━━━━━━━━※ ·❆· ※━━━━━━━━━━
+𓈃 BACKUP VPS BERHASIL 𓈃
+━━━━━━━━━━※ ·❆· ※━━━━━━━━━━
+📌 IP VPS       : $IP
+🌐 DOMAIN       : $domain
+📅 TANGGAL      : $date
+━━━━━━━━━━※ ·❆· ※━━━━━━━━━━
+📂 LINK BACKUP :  
+$link
+━━━━━━━━━━※ ·❆· ※━━━━━━━━━━
+✅ Backup selesai!  
+📌 Simpan link ini dan gunakan untuk restore di VPS baru, Onii-Chan.
+"
+curl -s --max-time $TIME -d "chat_id=$CHATID&disable_web_page_preview=1&text=$TEXT&parse_mode=html" $URL >/dev/null
+
+exit 0

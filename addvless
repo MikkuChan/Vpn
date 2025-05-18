@@ -1,0 +1,437 @@
+#!/bin/bash
+# ───────────────※ ·❆· ※───────────────
+# 𓈃 System Request ➠ Debian 9+/Ubuntu 18.04+/20+
+# 𓈃 Develovers ➠ MikkuChan
+# 𓈃 Email      ➠ fadztechs2@gmail.com
+# 𓈃 telegram   ➠ https://t.me/fadzdigital
+# 𓈃 whatsapp   ➠ wa.me/+6285727035336
+# ───────────────※ ·❆· ※───────────────
+
+RED="\033[31m"
+YELLOW="\033[33m"
+NC='\e[0m'
+YELL='\033[0;33m'
+BRED='\033[1;31m'
+GREEN='\033[0;32m'
+ORANGE='\033[33m'
+BGWHITE='\e[0;100;37m'
+
+CHATID=$(grep -E "^#bot# " "/etc/bot/.bot.db" | cut -d ' ' -f 3)
+KEY=$(grep -E "^#bot# " "/etc/bot/.bot.db" | cut -d ' ' -f 2)
+export TIME="10"
+export URL="https://api.telegram.org/bot$KEY/sendMessage"
+clear
+#IZIN SCRIPT
+MYIP=$(curl -sS ipv4.icanhazip.com)
+echo -e "\e[32mloading...\e[0m"
+clear
+
+# Warna ANSI untuk tampilan terminal
+RED='\033[1;91m'
+GREEN='\033[1;92m'
+YELLOW='\033[1;93m'
+BLUE='\033[1;94m'
+CYAN='\033[1;96m'
+WHITE='\033[1;97m'
+NC='\033[0m' # Reset warna
+
+# Fungsi untuk menampilkan animasi loading
+loading() {
+    bar="■□□□□□□□□□"
+    step=1
+    while [ $step -le 3 ]; do
+        case $step in
+            1) bar="■□□□□□□□□□" ;;
+            2) bar="■■■■□□□□□□" ;;
+            3) bar="■■■■■■■■■■" ;;
+        esac
+        echo -ne "\r⏳ ${YELLOW}$1${NC}   [$bar]"
+        step=$((step+1))
+        sleep 1
+    done
+    echo -ne "\r✅ ${GREEN}$1 Selesai!${NC}          \n"
+}
+
+# Validasi Script
+clear
+echo -e "${CYAN}━━━━━━━━━━━━━━━━※❆※━━━━━━━━━━━━━━━━${NC}"
+echo -e "🔄 ${WHITE}MEMERIKSA PERMISSION VPS...${NC}"
+echo -e "${CYAN}━━━━━━━━━━━━━━━━※❆※━━━━━━━━━━━━━━━━${NC}"
+loading "Mengambil IP VPS"
+ipsaya=$(curl -sS ipv4.icanhazip.com)
+loading "Mengambil Data Server"
+data_server=$(curl -v --insecure --silent https://google.com/ 2>&1 | grep Date | sed -e 's/< Date: //')
+date_list=$(date +"%Y-%m-%d" -d "$data_server")
+data_ip="https://raw.githubusercontent.com/MikkuChan/instalasi/main/register"
+
+checking_sc() {
+  useexp=$(wget -qO- $data_ip | grep $ipsaya | awk '{print $3}')
+  if [[ $date_list < $useexp ]]; then
+    echo -ne
+  else
+    clear
+    echo -e "${RED}━━━━━━━━━━━━━━━━※❆※━━━━━━━━━━━━━━━━${NC}"
+    echo -e "❌ ${WHITE}PERMISSION DENIED!${NC}"
+    echo -e "${RED}━━━━━━━━━━━━━━━━※❆※━━━━━━━━━━━━━━━━${NC}"
+    echo -e "🚫 VPS Anda: $ipsaya"
+    echo -e "💀 Status: ${RED}Diblokir${NC}"
+    echo -e ""
+    echo -e "📌 Hubungi admin untuk membeli akses."
+    echo -e "${RED}━━━━━━━━━━━━━━━━※❆※━━━━━━━━━━━━━━━━${NC}"
+    exit 0
+  fi
+}
+checking_sc
+clear
+
+# Membaca domain Xray
+domain=$(cat /etc/xray/domain)
+
+# Membuat Akun VLESS
+clear
+echo -e "${CYAN}━━━━━━━━━━━━━━━━※❆※━━━━━━━━━━━━━━━━${NC}"
+echo -e "🔹 ${WHITE}MEMBUAT AKUN VLESS...${NC}"
+echo -e "${CYAN}━━━━━━━━━━━━━━━━※❆※━━━━━━━━━━━━━━━━${NC}"
+
+while true; do
+    read -rp "➠ Username: " user
+    CLIENT_EXISTS=$(grep -w $user /etc/xray/config.json | wc -l)
+
+    if [[ ${CLIENT_EXISTS} == '1' ]]; then
+        clear
+        echo -e "${RED}━━━━━━━━━━━━━━━━※❆※━━━━━━━━━━━━━━━━${NC}"
+        echo -e "⚠️ ${WHITE}Akun sudah ada!${NC}"
+        echo -e "${RED}━━━━━━━━━━━━━━━━※❆※━━━━━━━━━━━━━━━━${NC}"
+        echo -e "🔁 Silakan pilih nama lain."
+        echo -e "${RED}━━━━━━━━━━━━━━━━※❆※━━━━━━━━━━━━━━━━${NC}"
+        read -n 1 -s -r -p "🔙 Tekan sembarang tombol untuk kembali..."
+        continue
+    fi
+    break
+done
+
+# Memilih jenis UUID
+echo -e "${CYAN}━━━━━━━━━━━━━━━━※❆※━━━━━━━━━━━━━━━━${NC}"
+echo -e "🔹 ${WHITE}MEMILIH UUID...${NC}"
+echo -e "${CYAN}━━━━━━━━━━━━━━━━※❆※━━━━━━━━━━━━━━━━${NC}"
+echo -e "1️⃣ Random UUID"
+echo -e "2️⃣ Custom UUID"
+read -rp "➠ Pilih [1/2]: " uuid_type
+
+# Generate UUID berdasarkan pilihan
+if [[ $uuid_type == '1' ]]; then
+  uuid=$(cat /proc/sys/kernel/random/uuid)
+elif [[ $uuid_type == '2' ]]; then
+  read -rp "➠ Masukkan UUID: " uuid
+else
+  echo "Pilihan tidak valid, menggunakan UUID acak."
+  uuid=$(cat /proc/sys/kernel/random/uuid)
+fi
+
+# Memasukkan durasi akun
+echo -e "${CYAN}━━━━━━━━━━━━━━━━※❆※━━━━━━━━━━━━━━━━${NC}"
+echo -e "⏳ ${WHITE}MASUKKAN DURASI AKUN...${NC}"
+echo -e "${CYAN}━━━━━━━━━━━━━━━━※❆※━━━━━━━━━━━━━━━━${NC}"
+read -p "➠ Expired (hari): " masaaktif
+
+# Memasukkan batas kuota & IP
+echo -e "${CYAN}━━━━━━━━━━━━━━━━※❆※━━━━━━━━━━━━━━━━${NC}"
+echo -e "📊 ${WHITE}BATASAN AKSES${NC}"
+echo -e "${CYAN}━━━━━━━━━━━━━━━━※❆※━━━━━━━━━━━━━━━━${NC}"
+read -p "➠ Limit Data (GB): " Quota
+read -p "➠ Limit IP: " iplimit
+
+# Menghitung tanggal kedaluwarsa
+tgl=$(date -d "$masaaktif days" +"%d")
+bln=$(date -d "$masaaktif days" +"%b")
+thn=$(date -d "$masaaktif days" +"%Y")
+expe="$tgl $bln, $thn"
+tgl2=$(date +"%d")
+bln2=$(date +"%b")
+thn2=$(date +"%Y")
+tnggl="$tgl2 $bln2, $thn2"
+exp=$(date -d "$masaaktif days" +"%Y-%m-%d")
+
+# Menyimpan data ke konfigurasi Xray
+loading "Menyimpan Konfigurasi"
+sed -i '/#vless$/a\#& '"$user $exp"'\
+},{"id": "'""$uuid""'","email" : "'""$user""'"' /etc/xray/config.json
+sed -i '/#vlessgrpc$/a\#& '"$user $exp"'\
+},{"id": "'""$uuid""'","email" : "'""$user""'"' /etc/xray/config.json
+
+vlesslink1="vless://${uuid}@bugmu.com:443/?type=ws&encryption=none&host=${domain}&path=%2Fvless&security=tls&sni=${domain}&fp=randomized#${user}"
+vlesslink2="vless://${uuid}@bugmu.com:80/?type=ws&encryption=none&host=${domain}&path=%2Fvless#${user}"
+vlesslink3="vless://${uuid}@bugmu.com:443/?type=grpc&encryption=none&flow=&serviceName=vless-grpc&security=tls&sni=${domain}#${user}"
+if [ ! -e /etc/vless ]; then
+  mkdir -p /etc/vless
+fi
+
+if [[ $iplimit -gt 0 ]]; then
+mkdir -p /etc/kyt/limit/vless/ip
+echo -e "$iplimit" > /etc/kyt/limit/vless/ip/$user
+else
+echo > /dev/null
+fi
+
+if [ -z ${Quota} ]; then
+  Quota="0"
+fi
+
+c=$(echo "${Quota}" | sed 's/[^0-9]*//g')
+d=$((${c} * 1024 * 1024 * 1024))
+
+if [[ ${c} != "0" ]]; then
+  echo "${d}" >/etc/vless/${user}
+fi
+DATADB=$(cat /etc/vless/.vless.db | grep "^###" | grep -w "${user}" | awk '{print $2}')
+if [[ "${DATADB}" != '' ]]; then
+  sed -i "/\b${user}\b/d" /etc/vless/.vless.db
+fi
+echo "### ${user} ${exp} ${uuid} ${Quota} ${iplimit}" >>/etc/vless/.vless.db
+clear
+cat >/var/www/html/vless-$user.txt <<-END
+
+       # FORMAT OpenClash #
+
+   # FORMAT VLESS WS TLS #
+
+- name: Vless-$user-WS TLS
+  server: bugmu.com
+  port: 443
+  type: vless
+  uuid: ${uuid}
+  cipher: auto
+  tls: true
+  skip-cert-verify: true
+  servername: ${domain}
+  network: ws
+  ws-opts:
+    path: /vless
+    headers:
+      Host: ${domain}
+  udp: true
+
+# FORMAT VLESS WS NON TLS #
+
+- name: Vless-$user-WS (CDN) Non TLS
+  server: bugmu.com
+  port: 80
+  type: vless
+  uuid: ${uuid}
+  cipher: auto
+  tls: false
+  skip-cert-verify: false
+  servername: ${domain}
+  network: ws
+  ws-opts:
+    path: /vless
+    headers:
+      Host: ${domain}
+  udp: true
+
+     # FORMAT VLESS gRPC #
+
+- name: Vless-$user-gRPC (SNI)
+  server: ${domain}
+  port: 443
+  type: vless
+  uuid: ${uuid}
+  cipher: auto
+  tls: true
+  skip-cert-verify: true
+  servername: ${domain}
+  network: grpc
+  grpc-opts:
+    grpc-service-name: vless-grpc
+  udp: true
+
+           # VLESS WS TLS #
+           
+${vlesslink1}
+
+      # VLESS WS NON TLS #
+
+${vlesslink2}
+
+         # VLESS WS gRPC #
+
+${vlesslink3}
+
+END
+clear
+# Sesi Baca
+BOT_TOKEN=$(cat /etc/telegram_bot/bot_token)
+CHAT_ID=$(cat /etc/telegram_bot/chat_id)
+
+# Logging untuk debug
+echo "$(date): Checking Telegram credentials" >> /var/log/telegram_debug.log
+echo "Bot Token: $BOT_TOKEN" >> /var/log/telegram_debug.log
+echo "Chat ID: $CHAT_ID" >> /var/log/telegram_debug.log
+
+# Nilai Info
+location=$(curl -s ipinfo.io/json)
+CITY=$(echo "$location" | jq -r '.city')
+ISP=$(echo "$location" | jq -r '.org')
+MYIP=$(curl -s ifconfig.me)
+
+# Logging info location
+echo "$(date): Location Info" >> /var/log/telegram_debug.log
+echo "City: $CITY" >> /var/log/telegram_debug.log
+echo "ISP: $ISP" >> /var/log/telegram_debug.log
+echo "IP: $MYIP" >> /var/log/telegram_debug.log
+
+# Pengecekan Variabel
+CITY=${CITY:-"Saya Gatau"}
+ISP=${ISP:-"Saya Gatau"}
+
+# URL API Telegram 
+URL="https://api.telegram.org/bot$BOT_TOKEN/sendMessage"
+
+TEXT="───────────※ ·❆· ※───────────
+<b>𓈃 CITY</b>: <code>$CITY</code>
+<b>𓈃 ISP</b>: <code>$ISP</code>
+<b>𓈃 IP</b>: <code>$MYIP</code>
+───────────※ ·❆· ※───────────
+           <b>𓈃 DETAIL AKUN VLESS 𓈃</b>
+───────────※ ·❆· ※───────────
+➠ <b>Remarks</b>   : <code>${user}</code>
+➠ <b>Domain</b>    : <code>${domain}</code>
+➠ <b>Limit Quota</b>: <code>${Quota} GB</code>
+➠ <b>Port TLS</b>  : 400-900
+➠ <b>Port NTLS</b> : 80, 8080, 8081-9999
+➠ <b>id</b>        : <code>${uuid}</code>
+➠ <b>alterId</b>   : 0
+➠ <b>Security</b>  : auto
+➠ <b>network</b>   : ws or grpc
+➠ <b>Path</b>      : /Multi-Path
+➠ <b>Dynamic</b>   : https://bugmu.com/path
+➠ <b>Name</b>      : vless-grpc
+───────────※ ·❆· ※───────────
+              <b>𓈃 VLESS WS TLS 𓈃</b>
+───────────※ ·❆· ※───────────
+<pre>${vlesslink1}</pre>
+───────────※ ·❆· ※───────────
+              <b>𓈃 VLESS WS NON TLS 𓈃</b>
+───────────※ ·❆· ※───────────
+<pre>${vlesslink2}</pre>
+───────────※ ·❆· ※───────────
+              <b>𓈃 VLESS WS gRPC 𓈃</b>
+───────────※ ·❆· ※───────────
+<pre>${vlesslink3}</pre>
+───────────※ ·❆· ※───────────
+           <b>𓈃 FORMAT OpenClash 𓈃</b>
+───────────※ ·❆· ※───────────
+➠ https://${domain}:81/vless-$user.txt
+───────────※ ·❆· ※───────────
+           <b>𓈃 CONVERTER YAML 𓈃</b>
+───────────※ ·❆· ※───────────
+➠ https://vpntech.my.id/converteryaml
+───────────※ ·❆· ※───────────
+          <b>𓈃 AUTO CONFIGURATION 𓈃</b>
+───────────※ ·❆· ※───────────
+➠ https://vpntech.my.id/auto-configuration
+───────────※ ·❆· ※───────────
+         <b>𓈃 START DATE END DATE 𓈃</b>
+───────────※ ·❆· ※───────────
+➠ <b>Aktif Selama</b> : $masaaktif Hari
+➠ <b>Dibuat Pada</b>  : $tnggl
+➠ <b>Berakhir Pada</b>: $expe
+───────────※ ·❆· ※───────────
+🤖 @085727035336"
+
+# Encode text untuk menghindari masalah karakter
+TEXT_ENCODED=$(echo "$TEXT" | jq -sRr @uri)
+
+# Kirim Pesan ke Telegram dengan logging
+echo "$(date): Sending Telegram message" >> /var/log/telegram_debug.log
+RESPONSE=$(curl -v -d "chat_id=$CHAT_ID&disable_web_page_preview=1&text=$TEXT_ENCODED&parse_mode=html" $URL 2>&1)
+echo "Telegram API Response: $RESPONSE" >> /var/log/telegram_debug.log
+
+# Test koneksi ke API Telegram
+TEST_RESPONSE=$(curl -s "https://api.telegram.org/bot$BOT_TOKEN/getMe")
+echo "Telegram Bot Test Response: $TEST_RESPONSE" >> /var/log/telegram_debug.log
+
+# Restart layanan
+systemctl restart xray
+systemctl restart nginx
+clear
+clear
+log_file="/etc/user-create/user.log"
+
+# Fungsi untuk menulis ke log dan echo ke terminal dengan format khusus
+log_echo() {
+  local message="$1"
+  echo -e "$message" | tee -a "$log_file"
+}
+
+# Fungsi untuk membuat garis pembatas
+separator() {
+  log_echo "───────────※ ·❆· ※───────────"
+}
+
+separator
+log_echo "𓈃 CITY: $CITY"
+log_echo "𓈃 ISP: $ISP"
+log_echo "𓈃 IP: $MYIP" # Pastikan $MYIP didefinisikan dan diisi sebelumnya
+separator
+
+log_echo "       𓈃 DETAIL AKUN VLESS 𓈃"
+separator
+log_echo "➠ Remarks  : ${user}"
+log_echo "➠ Domain    : ${domain}"
+#log_echo "➠ User Quota: ${Quota} GB" # Uncomment jika $Quota ada
+#log_echo "➠ User Ip   : ${iplimit} IP" # Uncomment jika $iplimit ada
+log_echo "➠ port TLS  : 400-900"
+#log_echo "➠ Port DNS  : 443" # Uncomment jika $PortDNS ada
+log_echo "➠ Port NTLS : 80, 8080, 8880, 2082"
+#log_echo "➠ User ID   : ${uuid}" # Uncomment jika $uuid ada
+#log_echo "➠ Xray Dns. : ${NS}" # Uncomment jika $NS ada
+#log_echo "➠ User Quota: ${Quota} GB" # Uncomment jika $Quota ada
+#log_echo "➠ Pubkey.   : ${PUB}" # Uncomment jika $PUB ada
+log_echo "➠ Encryption: none"
+log_echo "➠ Path TLS  : /vless/multi-path "
+log_echo "➠ ServiceName: vless-grpc"
+separator
+
+log_echo "          𓈃 VLESS WS TLS 𓈃"
+separator
+log_echo "${vlesslink1}"
+separator
+
+log_echo "       𓈃 VLESS WS NON TLS 𓈃"
+separator
+log_echo "${vlesslink2}"
+separator
+
+log_echo "          𓈃 VLESS WS gRPC 𓈃"
+separator
+log_echo "${vlesslink3}"
+separator
+
+log_echo "       𓈃 FORMAT OpenClash 𓈃"
+separator
+log_echo "➠ https://${domain}:81/vless-$user.txt"
+separator
+
+log_echo "       𓈃 CONVERTER YAML 𓈃"
+separator
+log_echo "➠ https://vpntech.my.id/converteryaml"
+separator
+
+log_echo "     𓈃 AUTO CONFIGURATION 𓈃"
+separator
+log_echo "➠ https://vpntech.my.id/auto-configuration"
+separator
+
+log_echo " 𓈃 START DATE END DATE 𓈃"
+separator
+log_echo "➠ Aktif Selama : $masaaktif Hari"
+log_echo "➠ Dibuat Pada  : $tnggl"
+log_echo "➠ Expired On     : $expe"
+separator
+
+log_echo "🤖 @085727035336"
+log_echo ""
+
+read -p "Onii-chan, Press Any Key To Back On Menu"
+m-vless
